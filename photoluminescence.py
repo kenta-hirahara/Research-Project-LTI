@@ -2,9 +2,7 @@
 import re
 import os
 
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import scipy.integrate as integrate
 
 def param_extractor(filepath):
@@ -23,7 +21,6 @@ def param_extractor(filepath):
     return parameter_dict
 
 def main():
-    plt.rcParams['text.usetex'] = True
     path = '/Users/kentahirahara/code/python3/Kenta'
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
@@ -35,7 +32,6 @@ def main():
     csv_filepath = f'{path_csv}/{csv_files[0]}'
     
     parameter_dict = param_extractor(csv_filepath)
-    print(parameter_dict)
 
     df = pd.read_csv(csv_filepath, sep='\s+')
     data = df.to_numpy()
@@ -45,8 +41,10 @@ def main():
     PL = integration / parameter_dict['A'] / parameter_dict['G']
     V = parameter_dict['E'] / 1000
     E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
+    parameter_dict['E_pump'] =E_pump
     PLQY = PL / E_pump
-    print(PLQY)
+    parameter_dict['PLQY'] = PLQY
+    print(parameter_dict)
 
 if __name__ == '__main__':
     main()
