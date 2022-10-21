@@ -1,0 +1,10 @@
+Gate delay: 110 ns
+Gate width: 3 ms
+
+Slit: 0,05 mm
+
+Temperature unstable; sample and sample holder have condensed water on them :/
+
+NEXT TIME: 
+Open gas flow valve less (e.g. 50%) to change temperature slowly.
+Check sample to see if there is any condensation!
