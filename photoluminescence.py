@@ -25,22 +25,19 @@ def param_extractor(filepath):
 def main():
     plt.rcParams['text.usetex'] = True
     path = '/Users/kentahirahara/code/python3/Kenta'
-    os.chdir(path)
-    os.getcwd()
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
     os.chdir(f'{path}/{files_dir[0]}')
     path_csv = os.getcwd()
     files = os.listdir(path_csv)
-    files_file = [f for f in files if os.path.isfile(os.path.join(path_csv, f))]
-    print(files_file) 
+    csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
     
-    filepath = f'{path_csv}/{files_file[0]}'
+    csv_filepath = f'{path_csv}/{csv_files[0]}'
     
-    parameter_dict = param_extractor(filepath)
+    parameter_dict = param_extractor(csv_filepath)
     print(parameter_dict)
 
-    df = pd.read_csv(filepath, sep='\s+')
+    df = pd.read_csv(csv_filepath, sep='\s+')
     data = df.to_numpy()
 
     integration = integrate.simps(data[:,1], data[:,0])
