@@ -61,7 +61,13 @@ def main():
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
             df = pd.concat([df,s])
     df = df.drop(columns='Glass')
+    df = df.sort_values('T')
     print(df)
     
+    temp = df['T'].to_list()
+    temp_set = set(temp)
+    sorted_temp_set = sorted(list(temp_set))
+    print(sorted_temp_set)
+    print(df[df['T'] == sorted_temp_set[0]])
 if __name__ == '__main__':
     main()
