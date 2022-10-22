@@ -20,6 +20,16 @@ def param_extractor(filepath):
     
     return parameter_dict
 
+def E_pump2n(E_pump):
+    d = 2.3e-5
+    abs = 7.3e-1
+    spotsize = 7.8e-3
+    λ = 5.32e-5
+    h = 6.626e-34
+    c = 3e10
+    
+    return E_pump * λ / h / c * abs / spotsize / d
+
 def main():
     df = pd.DataFrame()
     
@@ -45,12 +55,15 @@ def main():
             V = parameter_dict['E'] / 1000
             E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
             parameter_dict['E_pump'] = E_pump
-            PLQY = PL / E_pump
+            n = E_pump2n(E_pump)
+            parameter_dict['n'] = n
+            PLQY = PL / n
             parameter_dict['PLQY'] = PLQY
             # print(parameter_dict)
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
             df = pd.concat([df,s])
     df = df.drop(columns='Glass')
     print(df)
+    
 if __name__ == '__main__':
     main()
