@@ -21,12 +21,10 @@ def param_extractor(filepath):
     return parameter_dict
 
 def E_pump2n(E_pump):
-    d = 2.3e-5
-    abs = 7.3e-1
-    spotsize = 7.8e-3
+    h, c = 6.626e-34, 3e10
     λ = 5.32e-5
-    h = 6.626e-34
-    c = 3e10
+    d, spotsize = 2.3e-5, 7.8e-3
+    abs = 7.3e-1
     
     return E_pump * λ / h / c * abs / spotsize / d
 
