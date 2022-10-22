@@ -21,30 +21,36 @@ def param_extractor(filepath):
     return parameter_dict
 
 def main():
+    df = pd.DataFrame()
+    
     path = '/Users/kentahirahara/code/python3/Kenta'
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
-    os.chdir(f'{path}/{files_dir[0]}')
-    path_csv = os.getcwd()
-    files = os.listdir(path_csv)
-    csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
-    
-    csv_filepath = f'{path_csv}/{csv_files[0]}'
-    
-    parameter_dict = param_extractor(csv_filepath)
+    for directory in files_dir:
+        os.chdir(f'{path}/{directory}')
+        path_csv = os.getcwd()
+        files = os.listdir(path_csv)
+        csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
+        for csv_file in csv_files:
+            csv_filepath = f'{path_csv}/{csv_file}'
 
-    df = pd.read_csv(csv_filepath, sep='\s+')
-    data = df.to_numpy()
+            parameter_dict = param_extractor(csv_filepath)
 
-    integration = integrate.simps(data[:,1], data[:,0])
+            df_intensity_spectrum = pd.read_csv(csv_filepath, sep='\s+')
+            data = df_intensity_spectrum.to_numpy()
 
-    PL = integration / parameter_dict['A'] / parameter_dict['G']
-    V = parameter_dict['E'] / 1000
-    E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
-    parameter_dict['E_pump'] =E_pump
-    PLQY = PL / E_pump
-    parameter_dict['PLQY'] = PLQY
-    print(parameter_dict)
+            integrated_spectrum = integrate.simps(data[:,1], data[:,0])
 
+            PL = integrated_spectrum / parameter_dict['A'] / parameter_dict['G']
+            V = parameter_dict['E'] / 1000
+            E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
+            parameter_dict['E_pump'] = E_pump
+            PLQY = PL / E_pump
+            parameter_dict['PLQY'] = PLQY
+            # print(parameter_dict)
+            s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
+            df = pd.concat([df,s])
+    df = df.drop(columns='Glass')
+    print(df)
 if __name__ == '__main__':
     main()
