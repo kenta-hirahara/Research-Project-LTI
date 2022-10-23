@@ -38,7 +38,7 @@ def main():
     df = pd.DataFrame()
     match platform.system():
         case 'Darwin':
-            path = '~/code/python3/Kenta'
+            path = '/Users/kentahirahara/code/python3/Kenta'
         case 'Linux':
             path = '/home/kenn/code-python/KSOP/Research-Project-LTI'
     files = os.listdir(path)
