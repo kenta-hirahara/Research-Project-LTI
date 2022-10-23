@@ -10,6 +10,9 @@ def param_extractor(filepath):
     filename = split_path[-1]
     parameter_info = filename.split(' ')
     parameter_list = parameter_info[0].split('_')
+    month = parameter_info[2]
+    date = f'{parameter_info[1]}-{month[:3]}-{parameter_info[3]}'
+    time = parameter_info[4].replace('_', ':')
     
     parameter_dict = {}
     
@@ -18,7 +21,7 @@ def param_extractor(filepath):
         parameter = re.search('[a-z]+',parameter_str, flags=re.IGNORECASE)
         parameter_dict[parameter.group()] = int(value.group())
     
-    return parameter_dict
+    return [parameter_dict, date, time]
 
 def E_pump2n(E_pump):
     h, c = 6.626e-34, 3e10
@@ -29,6 +32,7 @@ def E_pump2n(E_pump):
     return E_pump * λ / h / c * abs / spotsize / d
 
 def main():
+    pd.options.display.precision = 20
     df = pd.DataFrame()
     
     path = '/Users/kentahirahara/code/python3/Kenta'
@@ -41,17 +45,16 @@ def main():
         csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
         for csv_file in csv_files:
             csv_filepath = f'{path_csv}/{csv_file}'
-
-            parameter_dict = param_extractor(csv_filepath)
-
+            parameter_dict = param_extractor(csv_filepath)[0]
+            parameter_dict['Date'] = param_extractor(csv_filepath)[1]
+            parameter_dict['Time'] = param_extractor(csv_filepath)[2]
             df_intensity_spectrum = pd.read_csv(csv_filepath, sep='\s+')
             data = df_intensity_spectrum.to_numpy()
-
             integrated_spectrum = integrate.simps(data[:,1], data[:,0])
-
             PL = integrated_spectrum / parameter_dict['A'] / parameter_dict['G']
             V = parameter_dict['E'] / 1000
             E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
+            # print(E_pump)
             parameter_dict['E_pump'] = E_pump
             n = E_pump2n(E_pump)
             parameter_dict['n'] = n
@@ -59,15 +62,21 @@ def main():
             parameter_dict['PLQY'] = PLQY
             # print(parameter_dict)
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
+            # print(s)
             df = pd.concat([df,s])
+            # print(param_extractor(csv_filepath))
     df = df.drop(columns='Glass')
     df = df.sort_values('T')
+    df = df.reindex(columns=['Date', 'Time', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
+    df.index = [i for i, _ in enumerate(df.index)]
     print(df)
-    
+
     temp = df['T'].to_list()
     temp_set = set(temp)
     sorted_temp_set = sorted(list(temp_set))
-    print(sorted_temp_set)
-    print(df[df['T'] == sorted_temp_set[0]])
+    # print(sorted_temp_set)
+    df_single_temp = df[df['T'] == sorted_temp_set[0]]
+    n = df_single_temp
+    
 if __name__ == '__main__':
     main()
