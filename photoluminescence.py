@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 import os
+import platform
 
 import pandas as pd
 import scipy.integrate as integrate
@@ -15,6 +16,11 @@ def param_extractor(filepath):
     date = f'{parameter_info[1]}-{month[:3]}-{parameter_info[3]}'
     time = parameter_info[4].replace('_', ':')
     
+    match platform.system():
+        case 'Darwin':
+            path = '~/code/python3/Kenta'
+        case 'Linux':
+            path = 
     parameter_dict = {}
     
     for parameter_str in parameter_list:
@@ -79,12 +85,12 @@ def main():
     col = 2
     row = sum(divmod(len(sorted_temp_set), col))
     fig = plt.figure(figsize=(16, 10), dpi=80)
-    fig.suptitle('PLQY')
+    fig.suptitle('PLQY', fontsize=20)
 
     for i, temp in enumerate(sorted_temp_set):
         df_single_temp = df[df['T'] == temp]
         df_single_temp = df_single_temp.sort_values('n')
-        print(df_single_temp)
+        # print(df_single_temp)
         n_ndarray = df_single_temp['n'].to_numpy()
         PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
     
@@ -96,5 +102,6 @@ def main():
         ax.set_title(f'{temp}K')
         ax.scatter(n_ndarray, PLQY_ndarray)
     plt.show()
+
 if __name__ == '__main__':
     main()
