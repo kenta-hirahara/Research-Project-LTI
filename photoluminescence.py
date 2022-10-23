@@ -76,21 +76,25 @@ def main():
     temp_set = set(temp)
     sorted_temp_set = sorted(list(temp_set))
     # print(sorted_temp_set)
-    df_single_temp = df[df['T'] == sorted_temp_set[0]]
-    df_single_temp = df_single_temp.sort_values('n')
-    print(df_single_temp)
-    n_ndarray = df_single_temp['n'].to_numpy()
-    PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
-    
+    col = 2
+    row = sum(divmod(len(sorted_temp_set), col))
+    fig = plt.figure(figsize=(16, 10), dpi=80)
+    fig.suptitle('PLQY')
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.set_xlabel(r'n')
-    ax.set_ylabel(r'PLQY')
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.scatter(n_ndarray, PLQY_ndarray)
-    ax.grid()
+    for i, temp in enumerate(sorted_temp_set):
+        df_single_temp = df[df['T'] == temp]
+        df_single_temp = df_single_temp.sort_values('n')
+        print(df_single_temp)
+        n_ndarray = df_single_temp['n'].to_numpy()
+        PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
+    
+        ax = fig.add_subplot(col, row, i+1)
+        ax.set_xlabel(r'n')
+        # ax.set_ylabel(r'PLQY')
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_title(f'{temp}K')
+        ax.scatter(n_ndarray, PLQY_ndarray)
     plt.show()
 if __name__ == '__main__':
     main()
