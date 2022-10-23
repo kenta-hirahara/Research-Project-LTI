@@ -16,11 +16,6 @@ def param_extractor(filepath):
     date = f'{parameter_info[1]}-{month[:3]}-{parameter_info[3]}'
     time = parameter_info[4].replace('_', ':')
     
-    match platform.system():
-        case 'Darwin':
-            path = '~/code/python3/Kenta'
-        case 'Linux':
-            path = 
     parameter_dict = {}
     
     for parameter_str in parameter_list:
@@ -41,8 +36,11 @@ def E_pump2n(E_pump):
 def main():
     pd.options.display.precision = 20
     df = pd.DataFrame()
-    
-    path = os.getcwd()
+    match platform.system():
+        case 'Darwin':
+            path = '~/code/python3/Kenta'
+        case 'Linux':
+            path = '/home/kenn/code-python/KSOP/Research-Project-LTI'
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
     for directory in files_dir:
