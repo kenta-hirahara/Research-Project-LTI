@@ -4,6 +4,7 @@ import os
 
 import pandas as pd
 import scipy.integrate as integrate
+from matplotlib import pyplot as plt
 
 def param_extractor(filepath):
     split_path = filepath.split('/')
@@ -35,7 +36,7 @@ def main():
     pd.options.display.precision = 20
     df = pd.DataFrame()
     
-    path = '/Users/kentahirahara/code/python3/Kenta'
+    path = os.getcwd()
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
     for directory in files_dir:
@@ -76,7 +77,20 @@ def main():
     sorted_temp_set = sorted(list(temp_set))
     # print(sorted_temp_set)
     df_single_temp = df[df['T'] == sorted_temp_set[0]]
-    n = df_single_temp
+    df_single_temp = df_single_temp.sort_values('n')
+    print(df_single_temp)
+    n_ndarray = df_single_temp['n'].to_numpy()
+    PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
     
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_xlabel(r'n')
+    ax.set_ylabel(r'PLQY')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.scatter(n_ndarray, PLQY_ndarray)
+    ax.grid()
+    plt.show()
 if __name__ == '__main__':
     main()
