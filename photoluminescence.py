@@ -74,14 +74,17 @@ def main():
     df = df.sort_values('T')
     df = df.reindex(columns=['Date', 'Time', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
     df.index = [i for i, _ in enumerate(df.index)]
-    print(df)
+    # print(df)
 
     temp = df['T'].to_list()
     temp_set = set(temp)
     sorted_temp_set = sorted(list(temp_set))
     # print(sorted_temp_set)
-    col = 2
-    row = sum(divmod(len(sorted_temp_set), col))
+    col = 3
+    num_of_fig = len(sorted_temp_set)
+    # row = sum(divmod(len(sorted_temp_set), col))
+    row = num_of_fig // col + 1 if num_of_fig % col else num_of_fig // col
+    
     fig = plt.figure(figsize=(16, 10), dpi=80)
     fig.suptitle('PLQY', fontsize=20)
 
@@ -93,11 +96,12 @@ def main():
         PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
     
         ax = fig.add_subplot(col, row, i+1)
-        ax.set_xlabel(r'n')
+        # ax.set_xlabel('Carrier density')
         # ax.set_ylabel(r'PLQY')
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.set_title(f'{temp}K')
+        ax.set_xlim(4e15, 6e17)
         ax.scatter(n_ndarray, PLQY_ndarray)
     plt.show()
 
