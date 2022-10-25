@@ -33,7 +33,7 @@ def main():
             integrated_spectrum = integrate.simps(data[:,1], data[:,0])
             PL = integrated_spectrum / parameter_dict['A'] / parameter_dict['G']
             V = parameter_dict['E'] / 1000
-            E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
+            E_pump = - 1e-8*V**4 + 4e-8*V**3 + 8e-9*V**2 + 1e-9*V  + 4e-10
             # print(E_pump)
             parameter_dict['E_pump'] = E_pump
             n = csv2df.E_pump2n(E_pump)
