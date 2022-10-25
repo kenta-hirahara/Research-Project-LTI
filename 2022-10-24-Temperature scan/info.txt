@@ -1,8 +1,0 @@
-z= 7000
-x=11000
-y= 38500
-
-Gate delay: 110 ns
-Gate width: 3 ms
-
-Slit: 0,05 mm
