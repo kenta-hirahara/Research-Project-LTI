@@ -45,6 +45,7 @@ def main():
             # print(s)
             df = pd.concat([df,s])
             # print(param_extractor(csv_filepath))
+    substrate = df.columns[0]
     df = df.drop(columns='Glass')
     df = df.sort_values('T')
     df = df.reindex(columns=['Date', 'Time', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
@@ -61,7 +62,7 @@ def main():
     row = num_of_fig // col + 1 if num_of_fig % col else num_of_fig // col
     
     fig = plt.figure(figsize=(16, 10), dpi=80)
-    fig.suptitle('PLQY', fontsize=20)
+    fig.suptitle(f'PLQY on {substrate}', fontsize=20)
 
     for i, temp in enumerate(sorted_temp_set):
         df_single_temp = df[df['T'] == temp]

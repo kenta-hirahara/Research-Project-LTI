@@ -13,7 +13,7 @@ def param_extractor(filepath):
     
     for parameter_str in parameter_list:
         value = re.search(r'\d+', parameter_str)
-        parameter = re.search('[a-z]+',parameter_str, flags=re.IGNORECASE)
+        parameter = re.search('[a-z]+', parameter_str, flags=re.IGNORECASE)
         parameter_dict[parameter.group()] = int(value.group())
     
     return [parameter_dict, date, time]
