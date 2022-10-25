@@ -80,8 +80,8 @@ def main():
     temp_set = set(temp)
     sorted_temp_set = sorted(list(temp_set))
     # print(sorted_temp_set)
-    col = 3
     num_of_fig = len(sorted_temp_set)
+    col = 3 if num_of_fig > 6 else 2
     # row = sum(divmod(len(sorted_temp_set), col))
     row = num_of_fig // col + 1 if num_of_fig % col else num_of_fig // col
     
