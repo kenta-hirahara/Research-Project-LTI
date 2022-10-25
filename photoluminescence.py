@@ -15,7 +15,7 @@ def main():
         case 'Darwin':
             path = '/Users/kentahirahara/code/python3/Research-Project-LTI/lab_data'
         case 'Linux':
-            path = '/home/kenn/code-python/KSOP/Research-Project-LTI'
+            path = '/home/kenn/code-python/KSOP/Research-Project-LTI/lab_data'
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
     for directory in files_dir:
