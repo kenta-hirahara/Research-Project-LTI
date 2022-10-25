@@ -50,15 +50,13 @@ def main():
     df = df.sort_values('T')
     df = df.reindex(columns=['Date', 'Time', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
     df.index = [i for i, _ in enumerate(df.index)]
-    # print(df)
 
     temp = df['T'].to_list()
     temp_set = set(temp)
     sorted_temp_set = sorted(list(temp_set))
-    # print(sorted_temp_set)
+
     num_of_fig = len(sorted_temp_set)
     col = 3 if num_of_fig > 6 else 2
-    # row = sum(divmod(len(sorted_temp_set), col))
     row = num_of_fig // col + 1 if num_of_fig % col else num_of_fig // col
     
     fig = plt.figure(figsize=(16, 10), dpi=80)
@@ -67,7 +65,7 @@ def main():
     for i, temp in enumerate(sorted_temp_set):
         df_single_temp = df[df['T'] == temp]
         df_single_temp = df_single_temp.sort_values('n')
-        # print(df_single_temp)
+
         n_ndarray = df_single_temp['n'].to_numpy()
         PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
     
