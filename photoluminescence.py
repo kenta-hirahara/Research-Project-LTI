@@ -7,31 +7,7 @@ import pandas as pd
 import scipy.integrate as integrate
 from matplotlib import pyplot as plt
 
-def param_extractor(filepath):
-    split_path = filepath.split('/')
-    filename = split_path[-1]
-    parameter_info = filename.split(' ')
-    parameter_list = parameter_info[0].split('_')
-    month = parameter_info[2]
-    date = f'{parameter_info[1]}-{month[:3]}-{parameter_info[3]}'
-    time = parameter_info[4].replace('_', ':')
-    
-    parameter_dict = {}
-    
-    for parameter_str in parameter_list:
-        value = re.search(r'\d+', parameter_str)
-        parameter = re.search('[a-z]+',parameter_str, flags=re.IGNORECASE)
-        parameter_dict[parameter.group()] = int(value.group())
-    
-    return [parameter_dict, date, time]
-
-def E_pump2n(E_pump):
-    h, c = 6.626e-34, 3e10
-    λ = 5.32e-5
-    d, spotsize = 2.3e-5, 7.8e-3
-    abs = 7.3e-1
-    
-    return E_pump * λ / h / c * abs / spotsize / d
+import csv2df
 
 def main():
     pd.options.display.precision = 20
@@ -50,9 +26,9 @@ def main():
         csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
         for csv_file in csv_files:
             csv_filepath = f'{path_csv}/{csv_file}'
-            parameter_dict = param_extractor(csv_filepath)[0]
-            parameter_dict['Date'] = param_extractor(csv_filepath)[1]
-            parameter_dict['Time'] = param_extractor(csv_filepath)[2]
+            parameter_dict = csv2df.param_extractor(csv_filepath)[0]
+            parameter_dict['Date'] = csv2df.param_extractor(csv_filepath)[1]
+            parameter_dict['Time'] = csv2df.param_extractor(csv_filepath)[2]
             df_intensity_spectrum = pd.read_csv(csv_filepath, sep='\s+')
             data = df_intensity_spectrum.to_numpy()
             integrated_spectrum = integrate.simps(data[:,1], data[:,0])
@@ -61,7 +37,7 @@ def main():
             E_pump = - 0.00000001*V**4 + 0.00000004*V**3 + 0.000000008*V**2 + 0.000000001*V  + 0.0000000004
             # print(E_pump)
             parameter_dict['E_pump'] = E_pump
-            n = E_pump2n(E_pump)
+            n = csv2df.E_pump2n(E_pump)
             parameter_dict['n'] = n
             PLQY = PL / n
             parameter_dict['PLQY'] = PLQY
