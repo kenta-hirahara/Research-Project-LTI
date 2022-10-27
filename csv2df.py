@@ -18,7 +18,7 @@ def param_extractor(filepath):
         parameter = re.search('[a-z]+', parameter_str, flags=re.IGNORECASE)
         parameter_dict[parameter.group()] = int(value.group())
     
-    return [parameter_dict, date, time, substrate]
+    return parameter_dict, date, time, substrate
 
 def E_pump2n(E_pump):
     h, c = 6.626e-34, 3e10
