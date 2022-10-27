@@ -80,7 +80,7 @@ def main():
             ax.set_title(f'{temp}K')
             # ax.set_xlim(1e15, 1e18)
             ax.scatter(n_ndarray, PLQY_ndarray)
-        plt.show()
+    plt.show()
 
 if __name__ == '__main__':
     main()
