@@ -26,13 +26,13 @@ def main():
         csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
         for csv_file in csv_files:
             csv_filepath = f'{path_csv}/{csv_file}'
-            extracted_params = csv2df.param_extractor(csv_filepath)
-            parameter_dict = extracted_params[0]
-            print(parameter_dict)
-            parameter_dict['Date'] = extracted_params[1]
-            parameter_dict['Time'] = extracted_params[2]
-            parameter_dict['Substrate'] = extracted_params[3]
-            substrates.add(extracted_params[3])
+            parameter_dict, date, time, substrate = csv2df.param_extractor(csv_filepath)
+            # parameter_dict = extracted_params[0]
+            # print(parameter_dict)
+            parameter_dict['Date'] = date
+            parameter_dict['Time'] = time
+            parameter_dict['Substrate'] = substrate
+            substrates.add(substrate)
             df_intensity_spectrum = pd.read_csv(csv_filepath, sep='\s+')
             data = df_intensity_spectrum.to_numpy()
             integrated_spectrum = integrate.simps(data[:,1], data[:,0])
@@ -52,8 +52,8 @@ def main():
             # print(param_extractor(csv_filepath))
     # substrate = df.columns[0]
     # df = df.drop(columns='Silicon')
-    for substrate in substrates:
-        df_substrate = df[df['Substrate'] == substrate]
+    for substrate_ in substrates:
+        df_substrate = df[df['Substrate'] == substrate_]
         df_substrate = df_substrate.sort_values('T')
         df_substrate = df_substrate.reindex(columns=['Date', 'Time', 'Substrate', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
         df_substrate.index = [i for i, _ in enumerate(df_substrate.index)]
@@ -67,7 +67,7 @@ def main():
         row = num_of_fig // col + 1 if num_of_fig % col else num_of_fig // col
 
         fig = plt.figure(figsize=(16, 10), dpi=80)
-        fig.suptitle(f'PLQY on {substrate}', fontsize=20)
+        fig.suptitle(f'PLQY on {substrate_}', fontsize=20)
 
         for i, temp in enumerate(sorted_temp_set):
             df_single_temp = df_substrate[df_substrate['T'] == temp]

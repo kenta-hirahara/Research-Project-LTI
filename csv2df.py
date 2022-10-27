@@ -10,7 +10,7 @@ def param_extractor(filepath):
     time = parameter_info[4].replace('_', ':')
     parameter_dict = {}
     
-    print(parameter_list)
+    # print(parameter_list)
     substrate = re.search('[a-z]+', parameter_list[0], flags=re.IGNORECASE).group()
     parameter_list = parameter_list[1:]
     for parameter_str in parameter_list:
