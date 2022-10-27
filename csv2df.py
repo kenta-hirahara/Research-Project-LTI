@@ -1,6 +1,6 @@
 import re
 
-def param_extractor(filepath):
+def param_extractor(filepath: str):
     split_path = filepath.split('/')
     filename = split_path[-1]
     parameter_info = filename.split(' ')
