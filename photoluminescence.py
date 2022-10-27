@@ -26,32 +26,28 @@ def main():
         csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
         for csv_file in csv_files:
             csv_filepath = f'{path_csv}/{csv_file}'
+
             parameter_dict, date, time, substrate = csv2df.param_extractor(csv_filepath)
-            # parameter_dict = extracted_params[0]
-            # print(parameter_dict)
             parameter_dict['Date'] = date
             parameter_dict['Time'] = time
             parameter_dict['Substrate'] = substrate
+
             substrates.add(substrate)
+            
             df_intensity_spectrum = pd.read_csv(csv_filepath, sep='\s+')
             data = df_intensity_spectrum.to_numpy()
             integrated_spectrum = integrate.simps(data[:,1], data[:,0])
             PL = integrated_spectrum / parameter_dict['A'] / parameter_dict['G']
             V = parameter_dict['E'] / 1000
             E_pump = - 1e-8*V**4 + 4e-8*V**3 + 8e-9*V**2 + 1e-9*V  + 4e-10
-            # print(E_pump)
             parameter_dict['E_pump'] = E_pump
             n = csv2df.E_pump2n(E_pump)
             parameter_dict['n'] = n
             PLQY = PL / n
             parameter_dict['PLQY'] = PLQY
-            # print(parameter_dict)
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
-            # print(s)
             df = pd.concat([df,s])
-            # print(param_extractor(csv_filepath))
-    # substrate = df.columns[0]
-    # df = df.drop(columns='Silicon')
+
     for substrate_ in substrates:
         df_substrate = df[df['Substrate'] == substrate_]
         df_substrate = df_substrate.sort_values('T')
