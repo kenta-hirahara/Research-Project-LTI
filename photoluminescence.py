@@ -3,6 +3,7 @@ import re
 import os
 import platform
 
+import numpy as np
 import pandas as pd
 import scipy.integrate as integrate
 from matplotlib import pyplot as plt
@@ -16,7 +17,8 @@ def main():
         case 'Linux':
             path = '/home/kenn/code-python/KSOP/Research-Project-LTI/lab_data'
     files = os.listdir(path)
-    files_dir = [f for f in files if os.path.isdir(os.path.join(path, f))]
+    files_dir = [f for f in files if os.path.isdir(os.path.join(path, f)) and f != 'wrong_data']
+    print(files_dir)
     substrates = set()
     for directory in files_dir:
         os.chdir(f'{path}/{directory}')
@@ -38,20 +40,29 @@ def main():
             integrated_spectrum = integrate.simps(data[:,1], data[:,0])
             PL = integrated_spectrum / parameter_dict['A'] / parameter_dict['G']
             V = parameter_dict['E'] / 1000
-            E_pump = - 1e-8*V**4 + 4e-8*V**3 + 8e-9*V**2 + 1e-9*V  + 4e-10
+            E_pump = - 1e-8*V**4 + 4e-8*V**3 + 8e-9*V**2 + 1e-9*V + 4e-10
             parameter_dict['E_pump'] = E_pump
             n = E_pump2n(E_pump)
             parameter_dict['n'] = n
-            PLQY = PL / n
+            PLQY = PL / n # PLQY = # of photons emitted / # of photons absorbed
             parameter_dict['PLQY'] = PLQY
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
             df = pd.concat([df,s])
+    #print(substrates)
+    print(df)
+    df.to_csv(f'{path}/df_.csv')
 
     for substrate_ in substrates:
         df_substrate = df[df['Substrate'] == substrate_]
         df_substrate = df_substrate.sort_values('T')
         df_substrate = df_substrate.reindex(columns=['Date', 'Time', 'Substrate', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
         df_substrate.index = [i for i, _ in enumerate(df_substrate.index)]
+
+        csv_each_substrate = f'{path}/df_substrate_{substrate_}.csv'
+
+        print(os.path.exists(csv_each_substrate))
+        #if not os.path.exists(csv_each_substrate):
+        df_substrate.to_csv(csv_each_substrate)
 
         temp = df_substrate['T'].to_list()
         temp_set = set(temp)
@@ -63,6 +74,7 @@ def main():
 
         fig = plt.figure(figsize=(16, 10), dpi=80)
         fig.suptitle(f'PLQY on {substrate_}', fontsize=20)
+        #print(df_substrate)
 
         for i, temp in enumerate(sorted_temp_set):
             df_single_temp = df_substrate[df_substrate['T'] == temp]
@@ -70,6 +82,10 @@ def main():
 
             n_ndarray = df_single_temp['n'].to_numpy()
             PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
+            #print(n_ndarray)
+
+        #    log10n = np.log10(n_ndarray)
+        ##   log10PLQY = np.log10(PLQY_ndarray)
 
             ax = fig.add_subplot(col, row, i+1)
             # ax.set_xlabel('Carrier density')
