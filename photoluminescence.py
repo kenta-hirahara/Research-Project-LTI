@@ -85,7 +85,7 @@ def main():
             #print(n_ndarray)
 
         #    log10n = np.log10(n_ndarray)
-        ##   log10PLQY = np.log10(PLQY_ndarray)
+        #    log10PLQY = np.log10(PLQY_ndarray)
 
             ax = fig.add_subplot(col, row, i+1)
             # ax.set_xlabel('Carrier density')
