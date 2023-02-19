@@ -49,7 +49,7 @@ def main():
             df = pd.concat([df,s])
     
     df = df[df['n'] > 0]
-    df.to_csv(f'{path}/df_.csv')
+    # df.to_csv(f'{path}/df_.csv')
 
     for substrate_ in substrates:
         df_substrate = df[df['Substrate'] == substrate_]
