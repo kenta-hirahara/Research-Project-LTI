@@ -73,16 +73,13 @@ def main():
 
         fig = plt.figure(figsize=(16, 10), dpi=80)
         fig.suptitle(f'PLQY on {substrate_}', fontsize=20)
-        #print(df_substrate)
 
         for i, temp in enumerate(sorted_temp_set):
             df_single_temp = df_substrate[df_substrate['T'] == temp]
             df_single_temp = df_single_temp.sort_values('n')
 
             n_list = df_single_temp['n'].values.tolist()
-            # print(df_single_temp['n'])
             PLQY_list = df_single_temp['PLQY'].values.tolist()
-            #print(n_ndarray)
             log10n = np.log10(n_list)
             log10PLQY = np.log10(PLQY_list)
 
