@@ -27,7 +27,6 @@ def main():
         csv_files = [f for f in files if os.path.isfile(os.path.join(path_csv, f)) and '.csv' in f]
         for csv_file in csv_files:
             csv_filepath = f'{path_csv}/{csv_file}'
-
             parameter_dict, date, time, substrate = param_extractor(csv_filepath)
             parameter_dict['Date'] = date
             parameter_dict['Time'] = time
@@ -48,8 +47,8 @@ def main():
             parameter_dict['PLQY'] = PLQY
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
             df = pd.concat([df,s])
-    #print(substrates)
-    print(df)
+    
+    df = df[df['n'] > 0]
     df.to_csv(f'{path}/df_.csv')
 
     for substrate_ in substrates:
@@ -80,12 +79,12 @@ def main():
             df_single_temp = df_substrate[df_substrate['T'] == temp]
             df_single_temp = df_single_temp.sort_values('n')
 
-            n_ndarray = df_single_temp['n'].to_numpy()
-            PLQY_ndarray = df_single_temp['PLQY'].to_numpy()
+            n_list = df_single_temp['n'].values.tolist()
+            # print(df_single_temp['n'])
+            PLQY_list = df_single_temp['PLQY'].values.tolist()
             #print(n_ndarray)
-
-        #    log10n = np.log10(n_ndarray)
-        #    log10PLQY = np.log10(PLQY_ndarray)
+            log10n = np.log10(n_list)
+            log10PLQY = np.log10(PLQY_list)
 
             ax = fig.add_subplot(col, row, i+1)
             # ax.set_xlabel('Carrier density')
@@ -94,7 +93,7 @@ def main():
             ax.set_yscale('log')
             ax.set_title(f'{temp}K')
             # ax.set_xlim(1e15, 1e18)
-            ax.scatter(n_ndarray, PLQY_ndarray)
+            ax.scatter(n_list, PLQY_list)
     plt.show()
 
 def param_extractor(filepath: str):
