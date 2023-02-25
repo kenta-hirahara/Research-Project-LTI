@@ -13,12 +13,12 @@ def main():
     df = pd.DataFrame()
     match platform.system():
         case 'Darwin':
-            path = '/Users/kentahirahara/code/python3/Research-Project-LTI/lab_data'
+            path = '/Users/kentahirahara/code/python3/Research-Project-LTI/lab_data_original'
         case 'Linux':
             path = '/home/kenn/code-python/KSOP/Research-Project-LTI/lab_data'
     files = os.listdir(path)
     files_dir = [f for f in files if os.path.isdir(os.path.join(path, f)) and f != 'wrong_data']
-    print(files_dir)
+    # print(files_dir)
     substrates = set()
     for directory in files_dir:
         os.chdir(f'{path}/{directory}')
@@ -48,8 +48,10 @@ def main():
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
             df = pd.concat([df,s])
     
-    df = df[df['n'] > 0]
+    df = df[df['n'] > 0] #carrier density has to be positive
+    print(df)
     # df.to_csv(f'{path}/df_.csv')
+    # print(substrates)
 
     for substrate_ in substrates:
         df_substrate = df[df['Substrate'] == substrate_]
@@ -58,11 +60,10 @@ def main():
         df_substrate.index = [i for i, _ in enumerate(df_substrate.index)]
 
         csv_each_substrate = f'{path}/df_substrate_{substrate_}.csv'
-
-        print(os.path.exists(csv_each_substrate))
-        #if not os.path.exists(csv_each_substrate):
         df_substrate.to_csv(csv_each_substrate)
 
+        # create csv file to select which data is favorable to be used for linear fitting for lower carrier concentration
+        df_fitting_select = df_substrate[]
         temp = df_substrate['T'].to_list()
         temp_set = set(temp)
         sorted_temp_set = sorted(list(temp_set))
@@ -73,7 +74,7 @@ def main():
 
         fig = plt.figure(figsize=(16, 10), dpi=80)
         fig.suptitle(f'PLQY on {substrate_}', fontsize=20)
-
+        print(sorted_temp_set)
         for i, temp in enumerate(sorted_temp_set):
             df_single_temp = df_substrate[df_substrate['T'] == temp]
             df_single_temp = df_single_temp.sort_values('n')
@@ -82,6 +83,7 @@ def main():
             PLQY_list = df_single_temp['PLQY'].values.tolist()
             log10n = np.log10(n_list)
             log10PLQY = np.log10(PLQY_list)
+            data_for_fitting = len(log10n) // 2
 
             ax = fig.add_subplot(col, row, i+1)
             # ax.set_xlabel('Carrier density')
