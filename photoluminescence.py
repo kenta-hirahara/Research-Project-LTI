@@ -10,6 +10,8 @@ from matplotlib import pyplot as plt
 
 def main():
     pd.options.display.precision = 20
+
+    pd.set_option('display.max_rows', None)
     df = pd.DataFrame()
     match platform.system():
         case 'Darwin':
@@ -17,8 +19,7 @@ def main():
         case 'Linux':
             path = '/home/kenn/code-python/KSOP/Research-Project-LTI/lab_data'
     files = os.listdir(path)
-    files_dir = [f for f in files if os.path.isdir(os.path.join(path, f)) and f != 'wrong_data']
-    # print(files_dir)
+    files_dir = [f for f in files if os.path.isdir(os.path.join(path, f)) and f != '.ipynb_checkpoints']
     substrates = set()
     for directory in files_dir:
         os.chdir(f'{path}/{directory}')
@@ -47,23 +48,18 @@ def main():
             parameter_dict['PLQY'] = PLQY
             s = pd.DataFrame(parameter_dict.values(), index=parameter_dict.keys()).T
             df = pd.concat([df,s])
-    
     df = df[df['n'] > 0] #carrier density has to be positive
-    print(df)
-    # df.to_csv(f'{path}/df_.csv')
-    # print(substrates)
 
+    ### Plot data for each substrate
     for substrate_ in substrates:
         df_substrate = df[df['Substrate'] == substrate_]
         df_substrate = df_substrate.sort_values('T')
+        # print(df_substrate)
         df_substrate = df_substrate.reindex(columns=['Date', 'Time', 'Substrate', 'T', 'A', 'G', 'E', 'E_pump', 'n', 'PLQY'])
         df_substrate.index = [i for i, _ in enumerate(df_substrate.index)]
 
-        csv_each_substrate = f'{path}/df_substrate_{substrate_}.csv'
-        df_substrate.to_csv(csv_each_substrate)
-
         # create csv file to select which data is favorable to be used for linear fitting for lower carrier concentration
-        df_fitting_select = df_substrate[]
+        # df_fitting_select = df_substrate[]
         temp = df_substrate['T'].to_list()
         temp_set = set(temp)
         sorted_temp_set = sorted(list(temp_set))
@@ -74,11 +70,16 @@ def main():
 
         fig = plt.figure(figsize=(16, 10), dpi=80)
         fig.suptitle(f'PLQY on {substrate_}', fontsize=20)
-        print(sorted_temp_set)
         for i, temp in enumerate(sorted_temp_set):
             df_single_temp = df_substrate[df_substrate['T'] == temp]
             df_single_temp = df_single_temp.sort_values('n')
-
+            df_single_temp = df_single_temp.reset_index(drop=True)
+            if i == 0:
+                df_substrate_catenated = df_single_temp
+            else:
+                df_substrate_catenated = pd.concat([df_substrate_catenated, df_single_temp], axis=0, join='inner') 
+                # print(df_substrate_catenated)
+            df_substrate_catenated.reset_index(drop=True)
             n_list = df_single_temp['n'].values.tolist()
             PLQY_list = df_single_temp['PLQY'].values.tolist()
             log10n = np.log10(n_list)
@@ -93,9 +94,15 @@ def main():
             ax.set_title(f'{temp}K')
             # ax.set_xlim(1e15, 1e18)
             ax.scatter(n_list, PLQY_list)
+        df_substrate_catenated = df_substrate_catenated.reset_index(drop=True)
+        csv_each_substrate = f'{path}/df_substrate_{substrate_}.csv' # under ~/code/python3/Research-Project-LTI/lab_data_original
+        df_substrate_catenated.to_csv(csv_each_substrate, index=False)
     plt.show()
 
 def param_extractor(filepath: str):
+    '''
+    Extract the parameter info out of the filename
+    '''
     split_path = filepath.split('/')
     filename = split_path[-1]
     parameter_info = filename.split(' ')
@@ -115,6 +122,9 @@ def param_extractor(filepath: str):
     return parameter_dict, date, time, substrate
 
 def E_pump2n(E_pump):
+    '''
+    Convert the pump energy into the carrier density
+    '''
     h, c = 6.626e-34, 3e10
     λ = 5.32e-5
     d, spotsize = 2.3e-5, 7.8e-3
