@@ -3,6 +3,7 @@ import re
 import os
 import platform
 import math
+import itertools
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,7 @@ def main():
     # Pandas settings
     pd.options.display.precision = 20
     pd.set_option('display.max_rows', None)
+    # initialize the dataframe of lab data
     df = pd.DataFrame()
     # directory initialization
     match platform.system():
@@ -26,9 +28,7 @@ def main():
     main_files_dirs = os.listdir(main_dir)
     lab_data_files_dirs = os.listdir(lab_data_dir)
     main_dir_csvfiles = [f for f in main_files_dirs if os.path.isfile(os.path.join(main_dir, f)) and '.csv' in f]
-    # print(main_dir_csvfiles)
     lab_data_files = [f for f in lab_data_files_dirs if os.path.isdir(os.path.join(path, f)) and f != '.ipynb_checkpoints']
-    # print(lab_data_files)
     substrates = set()
     for directory in lab_data_files:
         os.chdir(f'{path}/{directory}')
@@ -59,7 +59,6 @@ def main():
             df = pd.concat([df,s])
     df = df[df['n'] > 0]  # carrier density has to be positive
 
-    # Plot data for each substrate
     a = 1
     match a:
         # Create manual selector
@@ -93,38 +92,61 @@ def main():
         case 1:
             # input manual__.csv files into dataframes
             manual_files = [f for f in  main_dir_csvfiles if 'manual_df_' in f]
-            for manual_file in manual_files:
+            df_manual_files = [pd.read_csv(f'{main_dir}/{i}', sep=',') for i in manual_files]
+            temp_list__ = [sorted(list(set(df_manual_files[i]['T'].values.tolist()))) for i, _ in enumerate(df_manual_files)]
+            # print(temp_list__)
+            our_substrates = ['Glass', 'Silicon']
+            index = list(range(sum([len(i) for i in temp_list__])))
+            df_slopes = pd.DataFrame(data=None, index=index, columns=["Substrate", "Temperature", "slope"])
+            df_slopes["Temperature"] = list(itertools.chain.from_iterable(temp_list__))
+            substrate_counts = [len(i) for i in temp_list__]
+            df_slopes["Substrate"] = ['Glass']*substrate_counts[0] + ['Silicon']*substrate_counts[1]
+            # print(df_slopes)
+            for j, manual_file in enumerate(manual_files):
                 df_manual_file = pd.read_csv(f'{main_dir}/{manual_file}', sep=',')
                 temp_list = sorted(list(set(df_manual_file['T'].values.tolist())))
                 fig = plt.figure(figsize=(16, 10), dpi=80)
-                fig.suptitle(f'PLQY on {df_manual_file.iat[1,0]}', fontsize=20)
+                substrate__ = df_manual_file.iat[1,0]
+                fig.suptitle(f'PLQY on {substrate__}', fontsize=20)
                 for i, temp in enumerate(temp_list):
                     df_single_temp = df_manual_file[df_manual_file['T'] == temp]
                     # print(df_single_temp)
                     n_list = df_single_temp['n'].values.tolist()
                     PLQY_list = df_single_temp['PLQY'].values.tolist()
-                    print(n_list)
-                    # n_list = [float(i) for i in n_list]
-                    # PLQY_list = [float(i) for i in PLQY_list]
-                    # print('len(n_list) == len(PLQY_list): ', len(n_list) == len(PLQY_list))
+
+                    # n and PLQY data used for linear fitting
                     n_list_for_fit = [n_list[i] for i, _ in enumerate(n_list) if df_single_temp.iat[i,4]]
                     PLQY_list_for_fit = [PLQY_list[i] for i, _ in enumerate(PLQY_list) if df_single_temp.iat[i,4]]
+                    # n and PLQY data NOT used for linear fitting
                     n_list_for_no_fit = [n_list[i] for i, _ in enumerate(n_list) if not df_single_temp.iat[i,4]]
                     PLQY_list_for_no_fit = [PLQY_list[i] for i, _ in enumerate(PLQY_list) if not df_single_temp.iat[i,4]]
+
                     ax = fig.add_subplot(4, 3, i+1)
                     ax.set_xscale('log')
                     ax.set_yscale('log')
                     ax.set_title(f'{temp}K')
-                    # ax.set_xlim(1e15, 1e18)
-                    # print(n_list_for_no_fit)
                     ax.scatter(n_list_for_fit, PLQY_list_for_fit, c='red')
                     ax.scatter(n_list_for_no_fit, PLQY_list_for_no_fit, c='blue')
-                    horizontal_all, PLQY_fit = linear_fit_ln(n_list, n_list_for_fit, PLQY_list_for_fit)
-                    ax.plot(horizontal_all, PLQY_fit)
-        # read out dataframe into temperature dependent data
-        # cateorize data into 0: not used 1: used for fitting
-        # plot
-    plt.show()
+                    if len(n_list_for_fit) > 1:
+                        slope, horizontal_all, PLQY_fit = linear_fit_ln(n_list, n_list_for_fit, PLQY_list_for_fit)
+                        df_slopes.loc[(df_slopes["Substrate"]==substrate__) & (df_slopes["Temperature"]==temp), "slope"] = slope
+                        # df.loc[df['A'] < 0, 'A'] = -100
+                        ax.plot(horizontal_all, PLQY_fit, label= f'slope={round(slope, 4)}')
+                        ax.legend()
+            # print(df_slopes)
+            for substrate in our_substrates:
+                df_subst = df_slopes[df_slopes["Substrate"] == substrate]
+                print(df_subst)
+                fig_subst = plt.figure()
+                fig_subst.suptitle(f'Slope from SRH to ABC on {substrate}')
+                ax_subst = fig_subst.add_subplot(1, 1, 1)
+                ax_subst.set_xlabel('Temperature [K]')
+                ax_subst.set_ylabel('m')
+                ax_subst.hlines(0.5, 80, 299, color='gray', linestyle='-', linewidth=1, label='SRH')
+                ax_subst.hlines(1, 80, 299, color='gray', linestyle='-', linewidth=1, label='ABC')
+                ax_subst.plot(df_subst["Temperature"], df_subst["slope"])
+
+            plt.show()
 
 def param_extractor(filepath: str):
     '''
@@ -171,7 +193,7 @@ def linear_fit_ln(n_all, x, y):
         a, b = np.polyfit(log10_x, log10_y, 1)
         fit_log10_y = [a * i + b for i in log10_hor]
         fit_y = [10**i for i in fit_log10_y]
-        return horizontal_all, fit_y
+        return a, horizontal_all, fit_y
     else:
         pass
 
